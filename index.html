@@ -13,8 +13,8 @@ h1{text-align:center;font-size:20px;margin-bottom:20px;}
 h2{font-size:16px;margin-top:20px;border-bottom:1px solid #ddd;padding-bottom:5px;}
 form{display:flex;flex-direction:column;gap:18px;}
 .field{display:flex;flex-direction:column;gap:6px;}
-label{font-weight:bold;}
-input,select{width:100%;padding:10px;border-radius:6px;border:1px solid #ccc;}
+label{font-weight:bold;font-size:14px;}
+input,select{width:100%;padding:10px;border-radius:6px;border:1px solid #ccc;font-size:16px;}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .servicos-container{display:flex;flex-direction:column;gap:10px;}
 .servico-item{display:flex;gap:8px;}
@@ -22,7 +22,7 @@ input,select{width:100%;padding:10px;border-radius:6px;border:1px solid #ccc;}
 .btn-add,.btn-remove{width:28px;height:28px;border:none;border-radius:6px;cursor:pointer;font-weight:bold;}
 .btn-add{background:#1f7a3a;color:#fff;}
 .btn-remove{background:#b42e1f;color:#fff;}
-button{margin-top:10px;padding:12px;background:#1f7a3a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:bold;}
+button{margin-top:10px;padding:12px;background:#1f7a3a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:14px;}
 .btn-add, .btn-remove{
   width:28px;
   height:28px;
@@ -39,7 +39,6 @@ button{margin-top:10px;padding:12px;background:#1f7a3a;color:#fff;border:none;bo
 .checkbox-group{display:flex;gap:20px;flex-wrap:wrap;}
 .checkbox-item{display:flex;gap:8px;align-items:center;}
 .checkbox-item input{width:auto;}
-/* Botão vermelho de limpar formulário */
 .btn-limpar{
   background:#b42e1f;
   color:#fff;
@@ -49,12 +48,118 @@ button{margin-top:10px;padding:12px;background:#1f7a3a;color:#fff;border:none;bo
   cursor:pointer;
   font-weight:bold;
   margin-top:6px;
+  font-size:14px;
 }
 .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+
+/* MODAL DE CARREGAMENTO */
+.modal-loading{
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.5);
+  z-index:9999;
+  justify-content:center;
+  align-items:center;
+}
+
+.modal-loading.active{
+  display:flex;
+}
+
+.modal-content{
+  background:#fff;
+  padding:40px;
+  border-radius:12px;
+  text-align:center;
+  box-shadow:0 8px 30px rgba(0,0,0,0.2);
+  min-width:300px;
+}
+
+.spinner{
+  border:4px solid #f3f3f3;
+  border-top:4px solid #1f7a3a;
+  border-radius:50%;
+  width:50px;
+  height:50px;
+  animation:spin 1s linear infinite;
+  margin:0 auto 20px;
+}
+
+@keyframes spin{
+  0%{transform:rotate(0deg);}
+  100%{transform:rotate(360deg);}
+}
+
+.modal-content h2{
+  margin:0;
+  color:#333;
+  font-size:20px;
+  border:none;
+  padding:0;
+}
+
+.modal-content p{
+  margin:10px 0 0 0;
+  color:#666;
+  font-size:14px;
+}
+
+.success-icon{
+  display:none;
+  font-size:60px;
+  margin-bottom:20px;
+  animation:popIn 0.5s ease-out;
+}
+
+@keyframes popIn{
+  0%{transform:scale(0);}
+  100%{transform:scale(1);}
+}
+
+/* RESPONSIVE */
+@media (max-width:600px){
+  body{padding:12px;}
+  .card{padding:16px;border-radius:8px;}
+  h1{font-size:18px;margin-bottom:16px;}
+  h2{font-size:14px;margin-top:16px;}
+  form{gap:14px;}
+  .field{gap:4px;}
+  label{font-size:13px;}
+  input,select{padding:8px;font-size:14px;}
+  button{padding:10px;font-size:13px;}
+  .grid{grid-template-columns:1fr;gap:6px;}
+  .checkbox-group{gap:12px;}
+  .actions{flex-direction:column;}
+  button{width:100%;}
+  .modal-content{
+    padding:30px 20px;
+    min-width:280px;
+  }
+  .spinner{
+    width:40px;
+    height:40px;
+  }
+  .success-icon{
+    font-size:50px;
+  }
+}
 </style>
 </head>
 
 <body>
+
+<div class="modal-loading" id="modalLoading">
+  <div class="modal-content">
+    <div class="success-icon" id="successIcon">✓</div>
+    <div class="spinner" id="spinner"></div>
+    <h2 id="modalTitle">Gerando documento...</h2>
+    <p id="modalText">Aguarde, estamos processando seu contrato</p>
+  </div>
+</div>
 
 <div class="card">
   <h1>Documento Contratual</h1>
@@ -101,6 +206,18 @@ button{margin-top:10px;padding:12px;background:#1f7a3a;color:#fff;border:none;bo
     <div class="field" id="campoRG" style="display:none;">
       <label>RG</label>
       <input type="text" id="rg" placeholder="00.000.000-0">
+    </div>
+
+    <div class="field" id="campoEstadoCivil" style="display:none;">
+      <label>Estado Civil</label>
+      <select id="estadoCivil">
+        <option value="" disabled selected>Selecione</option>
+        <option value="Solteiro(a)">Solteiro(a)</option>
+        <option value="Casado(a)">Casado(a)</option>
+        <option value="Divorciado(a)">Divorciado(a)</option>
+        <option value="Viúvo(a)">Viúvo(a)</option>
+        <option value="União Estável">União Estável</option>
+      </select>
     </div>
 
     <div class="field" id="campoCNPJ" style="display:none;">
@@ -192,6 +309,11 @@ button{margin-top:10px;padding:12px;background:#1f7a3a;color:#fff;border:none;bo
 <script>
 // Element references
 const formContrato = document.getElementById('formContrato');
+const modalLoading = document.getElementById('modalLoading');
+const spinner = document.getElementById('spinner');
+const successIcon = document.getElementById('successIcon');
+const modalTitle = document.getElementById('modalTitle');
+const modalText = document.getElementById('modalText');
 const tipoPessoa = document.getElementById('tipoPessoa');
 const cnpj = document.getElementById('cnpj');
 const cpf = document.getElementById('cpf');
@@ -199,6 +321,8 @@ const rg = document.getElementById('rg');
 const campoCPF = document.getElementById('campoCPF');
 const campoRG = document.getElementById('campoRG');
 const campoCNPJ = document.getElementById('campoCNPJ');
+const campoEstadoCivil = document.getElementById('campoEstadoCivil');
+const estadoCivil = document.getElementById('estadoCivil');
 const ecosistema = document.getElementById('ecosistema');
 const limaluro = document.getElementById('limaluro');
 const servicosContainer = document.getElementById('servicosContainer');
@@ -217,6 +341,28 @@ const sexo = document.getElementById('sexo');
 const prazo = document.getElementById('prazo');
 const btnLimpar = document.getElementById('btnLimpar');
 
+// Funções do modal
+function showLoadingModal(){
+  modalLoading.classList.add('active');
+  spinner.style.display = 'block';
+  successIcon.style.display = 'none';
+  modalTitle.textContent = 'Gerando documento...';
+  modalText.textContent = 'Aguarde, estamos processando seu contrato';
+}
+
+function showSuccessModal(){
+  spinner.style.display = 'none';
+  successIcon.style.display = 'block';
+  modalTitle.textContent = 'Gerado com sucesso!';
+  modalText.textContent = 'Seu contrato foi processado';
+}
+
+function hideLoadingModal(){
+  setTimeout(() => {
+    modalLoading.classList.remove('active');
+  }, 1500);
+}
+
 // Controlar tipo de pessoa e mostrar campos apropriados
 tipoPessoa.addEventListener('change', function(){
   const isFisica = this.value === 'fisica';
@@ -224,6 +370,7 @@ tipoPessoa.addEventListener('change', function(){
 
   campoCPF.style.display = isFisica ? 'flex' : 'none';
   campoRG.style.display = isFisica ? 'flex' : 'none';
+  campoEstadoCivil.style.display = isFisica ? 'flex' : 'none';
   campoCNPJ.style.display = isJuridica ? 'flex' : 'none';
 
   // Limpar os campos não utilizados
@@ -232,6 +379,7 @@ tipoPessoa.addEventListener('change', function(){
   } else {
     cpf.value = '';
     rg.value = '';
+    estadoCivil.value = '';
   }
 });
 
@@ -340,18 +488,18 @@ function limitar(id){
 limitar('percentual');
 limitar('percentualProspec');
 
-// Função para limpar formulário (acionada pelo botão vermelho)
+// Função para limpar formulário
 function limparFormulario(){
-  // Reset básico do form
   formContrato.reset();
 
-  // Restaurar estado visual dos campos condicionais
   campoCPF.style.display = 'none';
   campoRG.style.display = 'none';
   campoCNPJ.style.display = 'none';
+  campoEstadoCivil.style.display = 'none';
   campoProspec.style.display = 'none';
 
-  // Restaurar container de serviços para o estado inicial (um campo + botão de adicionar)
+  estadoCivil.value = '';
+
   servicosContainer.innerHTML = `
     <div class="servico-item">
       <input type="text" placeholder="Digite o serviço">
@@ -360,9 +508,7 @@ function limparFormulario(){
   `;
 }
 
-// Associa o botão limpar
 btnLimpar.addEventListener('click', function(){
-  // Limpa sem pedir confirmação (se quiser confirmação, substitua por confirm())
   limparFormulario();
 });
 
@@ -375,6 +521,8 @@ formContrato.addEventListener('submit', async function(e){
     alert('Selecione um contratante (Ecosistema ou Lima&Luro)');
     return;
   }
+
+  showLoadingModal();
 
   const contratante = ecosistema.checked ? 'Ecosistema' : 'Lima&Luro';
 
@@ -390,6 +538,7 @@ formContrato.addEventListener('submit', async function(e){
       nome: nome.value,
       cpf: tipoPessoaSelecionado === 'fisica' ? cpf.value : '',
       rg: tipoPessoaSelecionado === 'fisica' ? rg.value : '',
+      estadoCivil: tipoPessoaSelecionado === 'fisica' ? estadoCivil.value : '',
       cnpj: tipoPessoaSelecionado === 'juridica' ? cnpj.value : '',
       rua: rua.value,
       numero: numero.value,
@@ -414,23 +563,17 @@ formContrato.addEventListener('submit', async function(e){
     });
 
     if(!response.ok){
-      // tenta ler texto de erro se houver
       let errText = '';
       try { errText = await response.text(); } catch {}
       throw new Error('Erro ao gerar PDF' + (errText ? (': ' + errText) : ''));
     }
 
-    // Recebe o PDF como blob
     const blob = await response.blob();
-
-    // Gera URL temporária
     const url = window.URL.createObjectURL(blob);
 
-    // Sanitiza nome do contratado para evitar caracteres inválidos em filename
     const nomeValue = (nome.value || '').trim();
     const safeName = nomeValue.replace(/[\/\\:*?"<>|]/g,'').replace(/\s+/g,' ').trim() || 'SemNome';
 
-    // Cria link para download com nome personalizado
     const a = document.createElement('a');
     a.href = url;
     a.download = `Contrato ${safeName}.pdf`;
@@ -439,11 +582,16 @@ formContrato.addEventListener('submit', async function(e){
     a.remove();
     window.URL.revokeObjectURL(url);
 
-    alert('PDF gerado e baixado com sucesso!');
-    
+    showSuccessModal();
+    hideLoadingModal();
+
   }catch(err){
     console.error(err);
-    alert('Erro ao enviar ou gerar PDF');
+    modalTitle.textContent = 'Erro ao gerar!';
+    modalText.textContent = 'Tente novamente em alguns instantes';
+    setTimeout(() => {
+      hideLoadingModal();
+    }, 2000);
   }
 });
 </script>
