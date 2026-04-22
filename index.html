@@ -440,8 +440,7 @@ formContrato.addEventListener('submit', async function(e){
     window.URL.revokeObjectURL(url);
 
     alert('PDF gerado e baixado com sucesso!');
-
-    // OBS: NÃO limpamos o formulário automaticamente — os dados permanecem até o usuário clicar em "Limpar formulário".
+    
   }catch(err){
     console.error(err);
     alert('Erro ao enviar ou gerar PDF');
