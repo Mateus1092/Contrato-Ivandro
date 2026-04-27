@@ -120,6 +120,18 @@ button{margin-top:10px;padding:12px;background:#1f7a3a;color:#fff;border:none;bo
   100%{transform:scale(1);}
 }
 
+.loading-spinner-small{
+  display:inline-block;
+  width:16px;
+  height:16px;
+  border:2px solid #f3f3f3;
+  border-top:2px solid #1f7a3a;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  margin-left:8px;
+  vertical-align:middle;
+}
+
 /* RESPONSIVE */
 @media (max-width:600px){
   body{padding:12px;}
@@ -221,7 +233,7 @@ button{margin-top:10px;padding:12px;background:#1f7a3a;color:#fff;border:none;bo
     </div>
 
     <div class="field" id="campoCNPJ" style="display:none;">
-      <label>CNPJ</label>
+      <label>CNPJ <span id="loadingCNPJ" class="loading-spinner-small" style="display:none;"></span></label>
       <input type="text" id="cnpj" placeholder="00.000.000/0000-00">
     </div>
 
@@ -345,6 +357,7 @@ const cidade = document.getElementById('cidade');
 const sexo = document.getElementById('sexo');
 const prazo = document.getElementById('prazo');
 const btnLimpar = document.getElementById('btnLimpar');
+const loadingCNPJ = document.getElementById('loadingCNPJ');
 
 // Funções do modal
 function showLoadingModal(){
@@ -397,7 +410,7 @@ limaluro.addEventListener('change', function(){
   if(this.checked) ecosistema.checked = false;
 });
 
-// CNPJ
+// CNPJ - Formatação
 cnpj.addEventListener('input', e=>{
   let v=e.target.value.replace(/\D/g,'');
   v=v.replace(/^(\d{2})(\d)/,'$1.$2');
@@ -405,6 +418,73 @@ cnpj.addEventListener('input', e=>{
   v=v.replace(/\.(\d{3})(\d)/,'.$1/$2');
   v=v.replace(/(\d{4})(\d)/,'$1-$2');
   e.target.value=v.substring(0,18);
+});
+
+// Buscar dados da empresa pelo CNPJ - APENAS NOME
+cnpj.addEventListener('blur', async function(){
+  const cnpjValue = this.value.replace(/\D/g,'');
+  
+  if(cnpjValue.length !== 14){
+    return;
+  }
+
+  loadingCNPJ.style.display = 'inline-block';
+
+  // Array com APIs para tentar em ordem
+  const apis = [
+    {
+      name: 'OpenCNPJ',
+      url: `https://api.opencnpj.org/${cnpjValue}`,
+      parser: (data) => data.name || data.razao_social
+    },
+    {
+      name: 'CNPJá',
+      url: `https://open.cnpja.com/office/${cnpjValue}`,
+      parser: (data) => {
+        const office = data.office || {};
+        return office.name || office.razao_social;
+      }
+    },
+    {
+      name: 'BrasilAPI',
+      url: `https://brasilapi.com.br/api/cnpj/v1/${cnpjValue}`,
+      parser: (data) => data.name
+    }
+  ];
+
+  let sucesso = false;
+
+  for(let api of apis){
+    try{
+      console.log(`Tentando API: ${api.name}`);
+      const response = await fetch(api.url);
+      
+      if(!response.ok) continue;
+
+      const data = await response.json();
+      
+      if(!data || Object.keys(data).length === 0) continue;
+
+      const nomeEmpresa = api.parser(data);
+
+      // Preencher apenas o nome
+      if(nomeEmpresa){
+        nome.value = nomeEmpresa;
+        sucesso = true;
+        break;
+      }
+
+    }catch(error){
+      console.log(`Erro com ${api.name}: ${error.message}`);
+      continue;
+    }
+  }
+
+  if(!sucesso){
+    console.log('Nenhuma API retornou o nome da empresa');
+  }
+
+  loadingCNPJ.style.display = 'none';
 });
 
 // CPF
