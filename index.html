@@ -242,6 +242,11 @@ button{margin-top:10px;padding:12px;background:#1f7a3a;color:#fff;border:none;bo
     </div>
 
     <div class="field">
+      <label>Complemento</label>
+      <input type="text" id="complemento" placeholder="Apto, bloco, casa, etc">
+    </div>
+
+    <div class="field">
       <label>Bairro</label>
       <input type="text" id="bairro" placeholder="Bairro" required>
     </div>
@@ -333,6 +338,7 @@ const percentualProspec = document.getElementById('percentualProspec');
 const nome = document.getElementById('nome');
 const rua = document.getElementById('rua');
 const numero = document.getElementById('numero');
+const complemento = document.getElementById('complemento');
 const bairro = document.getElementById('bairro');
 const cep = document.getElementById('cep');
 const cidade = document.getElementById('cidade');
@@ -541,6 +547,7 @@ formContrato.addEventListener('submit', async function(e){
       cnpj: tipoPessoaSelecionado === 'juridica' ? cnpj.value : '',
       rua: rua.value,
       numero: numero.value,
+      complemento: complemento.value,
       bairro: bairro.value,
       cep: cep.value,
       cidade: cidade.value
