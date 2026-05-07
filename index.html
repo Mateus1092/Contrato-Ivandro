@@ -132,6 +132,32 @@ button{margin-top:10px;padding:12px;background:#1f7a3a;color:#fff;border:none;bo
   vertical-align:middle;
 }
 
+.valor-diaria-row{
+  display:flex;
+  gap:12px;
+  align-items:flex-end;
+}
+
+.valor-diaria-row .field{
+  flex:1;
+}
+
+.diaria-checkbox-wrapper{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-bottom:6px;
+}
+
+.diaria-checkbox-wrapper label{
+  margin:0;
+  font-weight:normal;
+}
+
+.diaria-checkbox-wrapper input[type="checkbox"]{
+  width:auto;
+}
+
 /* RESPONSIVE */
 @media (max-width:600px){
   body{padding:12px;}
@@ -157,6 +183,12 @@ button{margin-top:10px;padding:12px;background:#1f7a3a;color:#fff;border:none;bo
   }
   .success-icon{
     font-size:50px;
+  }
+  .valor-diaria-row{
+    flex-direction:column;
+  }
+  .valor-diaria-row .field{
+    flex:none;
   }
 }
 </style>
@@ -191,6 +223,10 @@ button{margin-top:10px;padding:12px;background:#1f7a3a;color:#fff;border:none;bo
           <input type="checkbox" id="limaluro" name="contratante" value="Lima&Luro">
           <label for="limaluro" style="margin:0;">Lima&Luro</label>
         </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="ecotech" name="contratante" value="EcoTech">
+          <label for="ecotech" style="margin:0;">EcoTech</label>
+        </div>
       </div>
     </div>
 
@@ -203,6 +239,11 @@ button{margin-top:10px;padding:12px;background:#1f7a3a;color:#fff;border:none;bo
         <option value="fisica">Pessoa Física</option>
         <option value="juridica">Pessoa Jurídica</option>
       </select>
+    </div>
+
+    <div class="field" id="campoCNPJ" style="display:none;">
+      <label>CNPJ <span id="loadingCNPJ" class="loading-spinner-small" style="display:none;"></span></label>
+      <input type="text" id="cnpj" placeholder="00.000.000/0000-00">
     </div>
 
     <div class="field" id="campoNome">
@@ -230,11 +271,6 @@ button{margin-top:10px;padding:12px;background:#1f7a3a;color:#fff;border:none;bo
         <option value="Viúvo(a)">Viúvo(a)</option>
         <option value="União Estável">União Estável</option>
       </select>
-    </div>
-
-    <div class="field" id="campoCNPJ" style="display:none;">
-      <label>CNPJ <span id="loadingCNPJ" class="loading-spinner-small" style="display:none;"></span></label>
-      <input type="text" id="cnpj" placeholder="00.000.000/0000-00">
     </div>
 
     <div class="field">
@@ -278,9 +314,15 @@ button{margin-top:10px;padding:12px;background:#1f7a3a;color:#fff;border:none;bo
       </div>
     </div>
 
-    <div class="field">
-      <label>Ajuda de custo</label>
-      <input type="text" id="valor" placeholder="R$ 0,00">
+    <div class="valor-diaria-row">
+      <div class="field">
+        <label>Ajuda de custo</label>
+        <input type="text" id="valor" placeholder="R$ 0,00">
+      </div>
+      <div class="diaria-checkbox-wrapper">
+        <input type="checkbox" id="toggleDiaria" style="width:auto;">
+        <label for="toggleDiaria" style="margin:0;">Diária</label>
+      </div>
     </div>
 
     <div class="field">
@@ -347,6 +389,7 @@ const percentual = document.getElementById('percentual');
 const toggleProspec = document.getElementById('toggleProspec');
 const campoProspec = document.getElementById('campoProspec');
 const percentualProspec = document.getElementById('percentualProspec');
+const toggleDiaria = document.getElementById('toggleDiaria');
 const nome = document.getElementById('nome');
 const rua = document.getElementById('rua');
 const numero = document.getElementById('numero');
@@ -635,6 +678,7 @@ formContrato.addEventListener('submit', async function(e){
     servicos,
     valor: valor.value,
     percentual: percentual.value,
+    diaria: toggleDiaria.checked,
     prospeccao: toggleProspec.checked,
     percentualProspec: percentualProspec.value,
     sexo: sexo.value,
