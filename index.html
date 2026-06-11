@@ -245,6 +245,10 @@ button{margin-top:10px;padding:12px;background:#1f7a3a;color:#fff;border:none;bo
           <input type="checkbox" id="ecotech" name="contratante" value="EcoTech">
           <label for="ecotech" style="margin:0;">EcoTech</label>
         </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="ecoubatuba" name="contratante" value="EcoUbatuba">
+          <label for="ecoubatuba" style="margin:0;">EcoUbatuba</label>
+        </div>
       </div>
     </div>
 
@@ -405,6 +409,8 @@ const campoEstadoCivil = document.getElementById('campoEstadoCivil');
 const estadoCivil = document.getElementById('estadoCivil');
 const ecosistema = document.getElementById('ecosistema');
 const limaluro = document.getElementById('limaluro');
+const ecotech = document.getElementById('ecotech');
+const ecoubatuba = document.getElementById('ecoubatuba');
 const servicosContainer = document.getElementById('servicosContainer');
 const valor = document.getElementById('valor');
 const percentual = document.getElementById('percentual');
@@ -478,11 +484,35 @@ tipoPessoa.addEventListener('change', function(){
 
 // Controlar checkboxes mutuamente exclusivas para contratante
 ecosistema.addEventListener('change', function(){
-  if(this.checked) limaluro.checked = false;
+  if(this.checked) {
+    limaluro.checked = false;
+    ecotech.checked = false;
+    ecoubatuba.checked = false;
+  }
 });
 
 limaluro.addEventListener('change', function(){
-  if(this.checked) ecosistema.checked = false;
+  if(this.checked) {
+    ecosistema.checked = false;
+    ecotech.checked = false;
+    ecoubatuba.checked = false;
+  }
+});
+
+ecotech.addEventListener('change', function(){
+  if(this.checked) {
+    ecosistema.checked = false;
+    limaluro.checked = false;
+    ecoubatuba.checked = false;
+  }
+});
+
+ecoubatuba.addEventListener('change', function(){
+  if(this.checked) {
+    ecosistema.checked = false;
+    limaluro.checked = false;
+    ecotech.checked = false;
+  }
 });
 
 // CNPJ - Formatação
@@ -700,7 +730,8 @@ formContrato.addEventListener('submit', async function(e){
   if(
   !ecosistema.checked &&
   !limaluro.checked &&
-  !ecotech.checked
+  !ecotech.checked &&
+  !ecoubatuba.checked
 ){
   alert('Selecione um contratante');
   return;
@@ -719,7 +750,12 @@ formContrato.addEventListener('submit', async function(e){
 
   showLoadingModal();
 
-  const contratante = ecosistema.checked ? 'Ecosistema' : 'Lima&Luro';
+  // Obter o contratante selecionado
+  let contratante = '';
+  if(ecosistema.checked) contratante = 'Ecosistema';
+  else if(limaluro.checked) contratante = 'Lima&Luro';
+  else if(ecotech.checked) contratante = 'EcoTech';
+  else if(ecoubatuba.checked) contratante = 'EcoUbatuba';
 
   const servicos = [...document.querySelectorAll('#servicosContainer input')]
     .map(i=>i.value).filter(v=>v);
